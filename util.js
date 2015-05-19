@@ -1,7 +1,7 @@
 var Util = Util || {};
 
 Util.Teams = {
-    Swifts : {id: 0, name : "New South Wales Swifts"},
+    Swifts : {id: 0, name : "NSW Swifts"},
     Vixens : {id : 1, name : "Melbourne Vixens"},
     Pulse : {id : 2, name : "Central Pulse"},
     Magic : {id : 3, name : "Waikato Bay of Plenty Magic"},
@@ -53,7 +53,7 @@ Util.parseEverything = function(items, thenWhat) {
                complete : function(rows) {
         var matches =  _.map(rows.data, function(d) {
             d.year = year;
-            return Util.parseRowData(d);
+            return Util.parseRowData(d, year);
         });
         matches = _.filter(matches, function(x){return x != undefined;});
         Util.allMatches[year] = (matches);
@@ -62,12 +62,12 @@ Util.parseEverything = function(items, thenWhat) {
     });
 }
 
-Util.parseRowData = function(rowData) {
+Util.parseRowData = function(rowData, year) {
     if ((new RegExp(/BYES/)).exec(rowData['Date'])) {
         console.log("Houston we have  a bye");
         return undefined;
         }
-    var scorePair = rowData["Score"].replace(/\s+/, "").split(/\D+/), date = Util.parseDate(rowData["Date"]);
+    var scorePair = rowData["Score"].replace(/\s+/, "").split(/\D+/), date = Util.parseDate(rowData["Date"], year);
     scorePair[0] = parseInt(scorePair[0]);
     scorePair[1] = parseInt(scorePair[1]);
     var home = Util.parseTeam(rowData["Home Team"]);
@@ -99,4 +99,7 @@ Util.parseTeam = function(name) {
 }
 
 Util.parseEverything(_.range(2008, 2014)
-    .map(function(y) {return {text : window["y"+y], year : y};}));
+    .map(function(y) {
+         var info = {text : window["y"+y], year : y}
+         return info;
+         ;}));
