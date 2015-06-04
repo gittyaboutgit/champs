@@ -1,0 +1,209 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+<meta content="utf-8" http-equiv="encoding">
+
+<html>
+    <head>
+        <title>ANZ Champions</title>
+        <style>
+
+.bar {
+  fill: steelblue;
+}
+
+.bar:hover {
+  fill: brown;
+}
+
+.axis {
+  font: 14px sans-serif;
+  fill: white;
+}
+
+.axis path,
+.axis line {
+  fill: white;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.x.axis path {
+  display: none;
+}
+
+
+
+</style>
+    </head>
+    <script src="underscore.js" charset="utf-8"></script>
+    <script src="moment.js" charset="utf-8"></script>
+    <script src="papaparse.js" charset="utf-8"></script>
+    <script src="jsdata/alldata.js" charset="utf-8"></script>
+    <script src="d3/d3.js" charset="utf-8"></script>
+    <script src="d3/d3.min.js" charset="utf-8"></script>
+    <script src="util.js" charset="utf-8"></script>
+    <body>
+        <body bgcolor="black"> 
+        <form>
+            <font color="white">Select a year:</font>
+            <select id="year">
+                <option>2008</option>
+                <option>2009</option>
+                <option>2010</option>
+                <option>2011</option>
+                <option>2012</option>
+                <option>2013</option>
+            </select>
+        </form>
+        <form>
+            <font color="white">Select a team:</font>
+            <select id="team">
+                <option>NSW Swifts</option>
+                <option>Melbourne Vixens</option>
+                <option>Central Pulse</option>
+                <option>Waikato Bay of Plenty Magic</option>
+                <option>Canterbury Tactix</option>
+                <option>Southern Steel</option>
+                <option>Adelaide Thunderbirds</option>
+                <option>Northen Mystics</option>
+                <option>West Coast Fever</option>
+                <option>Queensland Firebirds</option>
+            </select>
+        </form>
+        <form>
+            <input type="button" value="ok" onClick="drawGraph()">
+            <input type="button" value="reset" onClick="refresh()">
+        </form>
+    <body>
+
+
+    <script language "JavaScript">
+
+    var barWidth;
+    var svg;
+
+        function drawGraph(){
+            var games = getMatches();
+            var seasonPerformance = getSeasonPerformance(games);
+            console.log("Amount of matches: " + seasonPerformance.length);
+            refresh();
+            draw(seasonPerformance);
+        }
+
+        /**
+        *   Returns a sorted list of all the matches for a given team in a given year.
+        */
+        function getMatches(){
+            var homeAndAway = [];
+            var allMatches = Util.allMatches[year.value];
+            for(var i = 0; i<allMatches.length; i++){
+                var match = allMatches[i];
+                if(match.homeTeam.name == team.value || match.awayTeam.name == team.value){
+
+                    homeAndAway.push(match);
+                }
+            }
+            return homeAndAway;
+        }
+
+        // SKIPS BYES... WHATS GOING ON! NEED TO INSERT A BYE OBJECT
+        function getSeasonPerformance(matches){
+            var seasonPerformance = [];
+            var index = 0;
+            for(var i = 0; i<matches.length; i++){
+                var pointDifference;
+                var match = matches[i];
+                // Deals if there is a draw
+                if(isNaN(match.scoreHome)){
+                    pointDifference = 0;
+                }
+                else if(match.homeTeam.name == team.value){
+                    pointDifference = match.scoreHome - match.scoreAway;
+                }
+                else if(match.awayTeam.name == team.value){
+                    pointDifference = match.scoreAway - match.scoreHome;
+                }
+                
+                // A hack to check if a bye has been made:
+                if(index>0 && match.round - seasonPerformance[index-1].round == 2){
+                    var byeObject = {homeTeam: team.value, awayTeam: "BYE", round: index+1, score: 0};
+                    seasonPerformance.push(byeObject);
+                    index++;
+                }
+                var matchAbbr = {homeTeam: match.homeTeam, awayTeam: match.awayTeam, round: match.round, score: pointDifference};
+                seasonPerformance.push(matchAbbr);
+                index++;
+            }
+            return seasonPerformance;
+        }
+
+        function draw(matches){
+            for(var j = 0; j<matches.length; j++){
+                console.log("round: " + matches[j].round + " score: " + matches[j].score);
+            }
+           var margin = {top: 30, right: 10, bottom: 10, left: 10},
+            width = 960 - margin.left - margin.right,
+            height = 500 - margin.top - margin.bottom;
+
+            var x = d3.scale.linear()
+                .range([0, width]);
+
+            var y = d3.scale.ordinal()
+                .rangeRoundBands([0, height], .2);
+
+            var xAxis = d3.svg.axis()
+                .scale(x)
+                .orient("top");
+
+            svg = d3.select("body").append("svg")
+                .attr("width", width + margin.left + margin.right)
+                .attr("height", height + margin.top + margin.bottom)
+              .append("g")
+                .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+            for(var i = 0; i<matches.length; i++){
+                y.domain(matches.map(function(d) {return d.round; }));
+                x.domain( [(-20), 20]);
+            }
+
+
+            svg.selectAll(".bar")
+               .data(matches)
+               .enter().append("rect")
+               .attr("class", function(d) { return d.score < 0 ? "bar negative" : "bar positive"; })
+               .attr("x", function(d) { return x(Math.min(0, d.score)); })
+               .attr("y", function(d) { return y(d.round); })
+               .attr("width", function(d) { return Math.abs(x(d.score) - x(0)); })
+               .attr("height", y.rangeBand());
+
+            svg.append("g")
+               .attr("class", "x axis")
+               .call(xAxis);
+
+            svg.append("g")
+                .attr("class", "y axis")
+                .append("line")
+                .attr("x1", x(0))
+                .attr("x2", x(0))
+                .attr("y2", height);
+
+
+      }
+
+function type(d) {
+  d.value = +d.value;
+  return d;
+} 
+  
+
+        function refresh(){
+            d3.select("body")
+              .selectAll("svg")
+              .remove();
+        }
+
+    </script>
+</html>
+
+
