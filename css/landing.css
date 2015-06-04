@@ -1,0 +1,52 @@
+.nav-button {
+    background-color: #FFFFFF;
+    margin-right : 0.8em;
+    color : "white";
+    font-size : 1.6em;
+    /*float : left;*/
+    display : inline-block;
+    border-right-width : 4px;
+    border-right-style : solid;
+    border-right-color : black
+}
+.option-button{
+    background-color: #2211FF;
+    margin-right : 0.8em;
+    color : #FFFFFF;
+    font-size : 1.6em;
+    /*float : left;*/
+    display : inline-block;
+    border-right-width : 4px;
+    border-right-style : solid;
+    border-right-color : black
+}
+#logo {
+    display : inline-block;
+}
+
+#body-section {
+    background-color : #FFFFFF;
+    margin-left : auto;
+    margin-right : auto;
+    width : 78%;
+    height : 100%;
+}
+
+#navbar {
+    display : inline-block;
+    top : 30px;
+    width : 100%;
+    background-color: #FFFFFF;
+}
+#options-bar {
+    display : inline-block;
+    top : 30px;
+    width : 100%;
+    background-color: #000000;
+}
+body {
+    font-family : Sans-Serif, Arial;
+    font-weight : bold;
+    background-color: #000000;
+}
+
