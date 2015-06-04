@@ -13,6 +13,17 @@ Util.Teams = {
     Firebirds : {id : 9, name : "Queensland Firebirds"}
 }
 
+Util.getTeamByIndex = function(index) {
+	 for (var team in Util.Teams) {
+		if (Util.Teams.hasOwnProperty(team)) {
+			team = Util.Teams[team];
+			console.log(team.id, index);
+			if (team.id == index) return team;
+		}
+	 }
+	return null;
+}
+
 Util.match = function (round, homeTeam, awayTeam, scoreHome, scoreAway, venue, gameDate) {
     this.round = round, this.homeTeam = homeTeam, this.awayTeam = awayTeam, this.scoreHome = scoreHome,
     this.scoreAway = scoreAway, this.venue = venue, this.gameDate = gameDate;
